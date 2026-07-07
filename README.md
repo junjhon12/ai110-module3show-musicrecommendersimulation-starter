@@ -17,17 +17,27 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world recommenders like Spotify or YouTube generally combine two strategies. **Collaborative filtering** predicts what a user will like based on patterns across *many users'* behavior — skips, likes, playlist co-occurrence — essentially "listeners like you also played X." It needs a large audience and struggles with new users or new items that have no history yet ("cold start"). **Content-based filtering** instead predicts preferences from the *attributes of the items themselves* (genre, tempo, mood, energy) matched against one user's own taste profile — it works even with a single user and no interaction history.
 
-Some prompts to answer:
+This project only has a 10-song catalog and one `UserProfile` per run, with no multi-user interaction data, so it implements **content-based filtering**: songs are recommended by matching song attributes directly against a user's stated preferences.
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+**Features used** (from `data/songs.csv`, mapped onto `Song`):
 
-You can include a simple diagram or bullet list if helpful.
+- `genre` — matched against `UserProfile.favorite_genre`
+- `mood` — matched against `UserProfile.favorite_mood`
+- `energy` — scored by *closeness* to `UserProfile.target_energy`
+- `acousticness` — checked against `UserProfile.likes_acoustic`
+
+(`tempo_bpm`, `valence`, and `danceability` also exist in the CSV but aren't modeled by `UserProfile` yet — good candidates for a future experiment.)
+
+**Scoring rule (per song):**
+
+- Categorical matches are binary: full points if `song.genre == user.favorite_genre`, else zero, and the same for mood. Genre is weighted higher than mood (e.g. 2.0 vs 1.0) since it's the stronger taste signal.
+- The numeric `energy` feature is scored by *closeness to target*, not by raw magnitude — a user who wants medium energy shouldn't get the highest-energy song in the catalog. The rule is `closeness = 1 - abs(song.energy - user.target_energy)`, scaled by a weight (e.g. 1.5), so a song with `energy` equal to the target scores highest and the score falls off symmetrically as it drifts away.
+- `acousticness` acts as a smaller bonus/penalty: a bonus if `likes_acoustic` is true and the song's acousticness is high, a small penalty otherwise — weighted lower than genre/mood since it's a softer preference.
+- The total score is the weighted sum of these components, and `explain_recommendation` reports which components contributed (e.g. "genre match (+2.0), energy close to target (+1.2)").
+
+**Scoring vs. ranking:** scoring is a *per-song* operation — given one song and one user profile, produce a single number (and reasons why). Ranking is a *list-level* operation — score every song in the catalog, sort descending, and take the top `k`. The system needs both: scoring alone doesn't decide an order, and ranking has nothing to sort until every song has a score.
 
 ---
 
