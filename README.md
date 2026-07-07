@@ -145,11 +145,11 @@ Run with `python -m src.main` and the default profile (`genre=pop, mood=happy, e
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+**Experiment: halve `GENRE_WEIGHT` (2.0 → 1.0), double `ENERGY_WEIGHT` (1.5 → 3.0).**
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+The math stayed valid (scores are still just a weighted sum, comparable and sortable the same way), but the rankings shifted noticeably. Songs that shared *only* energy with the target — regardless of genre — moved up several places. For example, for the "Deep Intense Rock" profile (`genre=rock, mood=intense, energy=0.95`), `Neon Pulse` (an EDM track with no genre or mood match, energy 0.95) jumped from a distant #3 into a near-tie with the #2 spot, purely on energy closeness. The top pick in every profile stayed the same song, but the *composition* of positions 2-5 became less genre-consistent and more "same vibe, any genre." This shows the system is genuinely sensitive to its weights: with genre no longer dominant, cross-genre songs that merely "feel" similar in intensity start competing directly with genre-correct picks. We reverted to the original weights (2.0 / 1.0 / 1.5) as the locked baseline since genre-first ranking matched intuition better for this catalog.
+
+See `model_card.md` → Evaluation for the full adversarial-profile stress test.
 
 ---
 
