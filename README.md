@@ -176,5 +176,9 @@ Write 1 to 2 paragraphs here about what you learned:
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
 
+Building this made "the algorithm recommended this" feel much less like magic and much more like arithmetic: every recommendation is just a weighted sum of a few comparisons (does the genre match, does the mood match, how close is the energy, is it acoustic) sorted from highest to lowest. There's no understanding of music happening anywhere in the code — just string equality checks and subtraction — yet the top results for a well-represented profile like "Chill Lofi" still felt genuinely personalized. That gap between how simple the math is and how personal the output feels is, in miniature, the same gap that makes real-world recommenders (Spotify, YouTube, TikTok) feel like they "get" a user when they're really just running comparisons at a much larger scale.
+
+The clearest place bias showed up was **data scarcity, not bad logic**: because most genres in the 20-song catalog have only one or two songs, a user whose favorite genre is rare (classical, edm, metal) gets that lone song ranked #1 almost automatically, even if its mood or energy is a poor fit — there's simply no competition to lose to. A similar problem showed up at the artist level, since three of four "pop" songs share one artist, so any pop-loving profile returns a top-5 list dominated by that one artist. Neither pattern is a coding bug; both come from an imbalanced catalog, which is exactly how real recommenders can end up over-representing whatever content is most abundant in their training data rather than what's actually the best fit for a given user.
+
 
 
